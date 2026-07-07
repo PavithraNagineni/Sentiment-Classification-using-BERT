@@ -5,4 +5,6 @@ __pycache__/
 .pytest_cache/
 .env
 .DS_Store
-outputs/bert_sentiment/best_model/
+outputs/**/best_model/
+outputs/**/checkpoint-*/
+

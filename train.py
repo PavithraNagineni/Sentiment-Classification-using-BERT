@@ -134,7 +134,7 @@ def plot_training_loss(log_history, save_path):
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
-def main(mode: str = "full"):
+def main(mode: str = "full", max_train_samples: int | None = None):
     torch.manual_seed(SEED)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -145,9 +145,15 @@ def main(mode: str = "full"):
             "Run training first: python train.py --mode full"
         )
 
-    logger.info(f"Loading dataset: {DATASET_NAME}")
-
-    dataset = load_dataset("nyu-mll/glue", "sst2")
+    logger.info("Loading dataset: attempting local dummy data if available")
+    if os.path.exists("data/dummy.csv"):
+        dataset = load_dataset("csv", data_files={"train": "data/dummy.csv", "validation": "data/dummy.csv"})
+    else:
+        dataset = load_dataset("nyu-mll/glue", "sst2")
+        if max_train_samples is not None and mode in ("full", "lora"):
+            train_size = min(max_train_samples, len(dataset["train"]))
+            dataset["train"] = dataset["train"].select(range(train_size))
+            logger.info(f"Using {train_size} training samples (max_train_samples={max_train_samples})")
 
     if mode == "eval":
         logger.info(f"Loading saved model from {model_path}")
@@ -170,7 +176,7 @@ def main(mode: str = "full"):
     tokenized = dataset.map(
         lambda x: tokenize(x, tokenizer),
         batched=True,
-        remove_columns=["sentence", "idx"],
+        remove_columns=["sentence"],
     )
     tokenized = tokenized.rename_column("label", "labels")
     tokenized.set_format("torch")
@@ -246,5 +252,11 @@ def main(mode: str = "full"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["full", "lora", "eval"], default="full")
+    parser.add_argument(
+        "--max_train_samples",
+        type=int,
+        default=None,
+        help="Limit training set size (useful for faster runs on CPU)",
+    )
     args = parser.parse_args()
-    main(args.mode)
+    main(args.mode, args.max_train_samples)

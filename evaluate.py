@@ -99,7 +99,10 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
     model     = AutoModelForSequenceClassification.from_pretrained(MODEL_PATH).to(DEVICE)
     model.eval()
-    dataset = load_dataset("nyu-mll/glue", "sst2")["validation"]
+    if os.path.exists("data/dummy.csv"):
+        dataset = load_dataset("csv", data_files={"validation": "data/dummy.csv"})["validation"]
+    else:
+        dataset = load_dataset("nyu-mll/glue", "sst2")["validation"]
 
 
     print("Running inference...")

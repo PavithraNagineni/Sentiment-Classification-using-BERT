@@ -12,20 +12,28 @@ Fine-tunes `bert-base-uncased` on the SST-2 dataset for binary sentiment classif
 ## Project Structure
 
 ```
-bert_sentiment/
-├── train.py          # Fine-tuning script (full + LoRA)
-├── evaluate.py       # Detailed evaluation + plots
-├── app.py            # FastAPI inference server
+Sentiment-Classification-using-BERT/
+├── .github/
+│   └── workflows/
+│       └── ci.yml     # GitHub Actions CI workflow
+├── data/
+│   └── dummy.csv      # Dummy dataset for offline CPU runs
+├── train.py           # Fine-tuning script (full + LoRA)
+├── evaluate.py        # Detailed evaluation + plots
+├── app.py             # FastAPI inference server
 ├── requirements.txt
 ├── Dockerfile
-└── outputs/
-    ├── best_model/   # Saved model weights
-    ├── metrics.json  # Evaluation metrics
+├── README.md
+├── .gitignore
+├── .dockerignore
+└── outputs/bert_sentiment/
+    ├── metrics.json   # Evaluation metrics (committed to git)
     ├── confusion_matrix.png
     ├── roc_curve.png
     ├── pr_curve.png
-    ├── loss_curve.png
     └── confidence_dist.png
+    # Note: best_model/ and checkpoint-* directories are ignored by git due to size
+
 ```
 
 ## Setup
