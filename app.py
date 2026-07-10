@@ -45,8 +45,25 @@ async def lifespan(app: FastAPI):
     try:
         if not os.path.isdir(MODEL_PATH):
             raise FileNotFoundError(f"No saved model found at {MODEL_PATH}")
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-        model     = AutoModelForSequenceClassification.from_pretrained(MODEL_PATH)
+        
+        if os.path.exists(os.path.join(MODEL_PATH, "adapter_config.json")):
+            logger.info("Detected LoRA adapters. Loading base model and applying adapters...")
+            from peft import PeftModel
+            with open(os.path.join(MODEL_PATH, "adapter_config.json"), "r") as f:
+                adapter_cfg = json.load(f)
+            base_model_id = adapter_cfg.get("base_model_name_or_path", "bert-base-uncased")
+            
+            tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+            base_model = AutoModelForSequenceClassification.from_pretrained(
+                base_model_id, num_labels=2,
+                id2label={0: "negative", 1: "positive"},
+                label2id={"negative": 0, "positive": 1}
+            )
+            model = PeftModel.from_pretrained(base_model, MODEL_PATH)
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+            model     = AutoModelForSequenceClassification.from_pretrained(MODEL_PATH)
+            
         model.to(DEVICE)
         model.eval()
         logger.info("Model loaded successfully!")
@@ -54,6 +71,7 @@ async def lifespan(app: FastAPI):
         logger.error(f"Model load failed: {e}")
         logger.warning("Using mock model for demo purposes.")
     yield
+
 
 
 app = FastAPI(
