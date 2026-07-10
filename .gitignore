@@ -5,6 +5,7 @@ __pycache__/
 .pytest_cache/
 .env
 .DS_Store
-outputs/**/best_model/
+outputs/**/best_model/model.safetensors
+outputs/**/best_model/pytorch_model.bin
 outputs/**/checkpoint-*/
 
