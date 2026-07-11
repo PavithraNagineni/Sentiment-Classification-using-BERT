@@ -7,7 +7,7 @@ function App() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
 
-  const API_URL = "https://sentiment-classification-using-bert.onrender.com/predict"
+  const API_URL = "https://sentiment-classification-using-bert-71tb.onrender.com/predict"
 
   const handleAnalyze = async () => {
     if (!text.trim()) return
