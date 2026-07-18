@@ -57,7 +57,8 @@ async def lifespan(app: FastAPI):
             base_model = AutoModelForSequenceClassification.from_pretrained(
                 base_model_id, num_labels=2,
                 id2label={0: "negative", 1: "positive"},
-                label2id={"negative": 0, "positive": 1}
+                label2id={"negative": 0, "positive": 1},
+                torch_dtype=torch.float16
             )
             model = PeftModel.from_pretrained(base_model, MODEL_PATH)
         else:
