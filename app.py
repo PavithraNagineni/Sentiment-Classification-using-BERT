@@ -68,6 +68,9 @@ async def lifespan(app: FastAPI):
         model.eval()
         logger.info("Model loaded successfully!")
     except Exception as e:
+        import traceback
+        global load_error
+        load_error = traceback.format_exc()
         logger.error(f"Model load failed: {e}")
         logger.warning("Using mock model for demo purposes.")
     yield
@@ -160,12 +163,15 @@ def predict_texts(texts: List[str]) -> List[PredictionResult]:
 
 
 # ── Routes ───────────────────────────────────────────────────────────────────
+load_error = None
+
 @app.get("/health")
 def health():
     return {
         "status": "healthy",
         "model_loaded": model is not None,
         "device": DEVICE,
+        "error": load_error
     }
 
 @app.get("/model/info")
